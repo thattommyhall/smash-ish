@@ -1,12 +1,12 @@
 VERSION=0.1.0
 LOVE_VERSION=11.5
-NAME=change-me
-ITCH_ACCOUNT=change-me-too
-URL=https://gitlab.com/alexjgriffith/min-love2d-fennel
-AUTHOR="Your Name"
-DESCRIPTION="Minimal setup for trying out Phil Hagelberg's fennel/love game design process."
-GITHUB_USERNAME := $(shell grep GITHUB_USERNAME credentials.private | cut -d= -f2)
-GITHUB_PAT := $(shell grep GITHUB_PAT credentials.private | cut -d= -f2)
+NAME=smash-ish
+ITCH_ACCOUNT=thattommyhall
+URL=https://github.com/thattommyhall/smash-ish
+AUTHOR="Jonah Vairon, Tom Hall"
+DESCRIPTION="Recurse Center S1'24 Game Jam entry"
+# GITHUB_USERNAME := $(shell grep GITHUB_USERNAME credentials.private | cut -d= -f2)
+# GITHUB_PAT := $(shell grep GITHUB_PAT credentials.private | cut -d= -f2)
 LIBS := $(wildcard lib/*)
 LUA := $(wildcard *.lua)
 SRC := $(wildcard *.fnl)
