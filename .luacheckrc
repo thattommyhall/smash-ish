@@ -10,3 +10,4 @@ max_line_length = false
 new_globals = {"love"}
 
 stds.fennel = {globals ={"fennel", "pp", "lume", "s"}}
+exclude_files = {"lib"}
