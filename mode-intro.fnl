@@ -62,9 +62,7 @@
         [_ _ _ _] :nothing)))
 
 (fn update-player [p dt]
-  (let [x (. p :x)
-        y (. p :y)
-        speed (. p :speed)
+  (let [{: x : y : speed} p
         [w a s d] [(. p :pressed :w)
                    (. p :pressed :a)
                    (. p :pressed :s)
@@ -80,11 +78,7 @@
 (local valid-keys {:w true :s true :a true :d true})
 
 (fn draw-entity [e]
-  (let [x (. e :x)
-        y (. e :y)
-        w (. e :w)
-        h (. e :h)
-        colour (. e :colour)]
+  (let [{: x : y : w : h : colour} e]
     (love.graphics.setColor (unpack colour))
     (love.graphics.rectangle :fill x y w h)))
 
