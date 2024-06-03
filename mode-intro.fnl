@@ -1,6 +1,8 @@
 (import-macros {: incf} :sample-macros)
 (local lume (require :lib.lume))
 (local bump (require :lib.bump))
+(local inspect (require :lib.inspect))
+
 (local (major minor revision) (love.getVersion))
 (local (width height _flags) (love.window.getMode))
 
