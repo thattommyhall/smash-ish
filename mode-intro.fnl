@@ -63,10 +63,7 @@
 
 (fn update-player [p dt]
   (let [{: x : y : speed} p
-        [w a s d] [(. p :pressed :w)
-                   (. p :pressed :a)
-                   (. p :pressed :s)
-                   (. p :pressed :d)]
+        {: w : a : s : d} (. p :pressed)
         direction (decide-direction w a s d)
         [dx dy] (. d-map direction)
         goal_x (+ x (* dx dt speed))
