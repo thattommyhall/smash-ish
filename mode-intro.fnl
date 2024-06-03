@@ -1,7 +1,7 @@
 (import-macros {: incf} :sample-macros)
 (local lume (require :lib.lume))
 
-(var world {"counter" 0
+(local world {"counter" 0
             "time" 0
             "background_colour" [0 0 0 1]
             "pos" [50 100]}) ;; x y
