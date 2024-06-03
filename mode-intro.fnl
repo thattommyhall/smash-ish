@@ -1,7 +1,16 @@
 (import-macros {: incf} :sample-macros)
 (local lume (require :lib.lume))
+(local (major minor revision) (love.getVersion))
+(local (width height _flags) (love.window.getMode))
 
-(local world {"counter" 0
+(fn generate-enemy [size]
+  {"pos" [(math.random (- width size)) (math.random (- height size))]
+   "size" size
+   "colour" [(math.random) (math.random) (math.random) 1]
+})
+
+(local world {
+            "counter" 0
             "time" 0
             "background_colour" [0 0 0 1]
             "p1" {
@@ -12,12 +21,17 @@
                            :s false
                            :a false
                            :d false}
-            }
-            }) 
+                "size" 32
+                }
+            "enemies" [(generate-enemy 32) (generate-enemy 64) (generate-enemy 64)]
+            ""
+            })
 
 (love.graphics.setNewFont 30)
 
-(local (major minor revision) (love.getVersion))
+
+
+
 
 (local d-map {
     :up [0 -1]
@@ -78,12 +92,19 @@
 })
 
 {:draw (fn draw [message]
-         (local (w h _flags) (love.window.getMode))
          (love.graphics.setColor (unpack (. world "background_colour")))
-         (love.graphics.rectangle :fill 0 0 w h)
+         (love.graphics.rectangle :fill 0 0 width height)
          (love.graphics.setColor 1 0 0 1) ;; red
-         (let [(x y) (unpack (. (. world "p1") "pos"))]
-           (love.graphics.rectangle :fill x y 16 16))
+         (let [(x y) (unpack (.  world "p1" "pos"))
+               size (. world "p1" "size")]
+           (love.graphics.rectangle :fill x y size size))
+         (let [enemies (. world "enemies")]
+           (each [_ enemy (ipairs enemies)]
+             (let [size (. enemy "size")
+                   colour (. enemy "colour")
+                   [x y] (. enemy "pos")]
+               (love.graphics.setColor (unpack colour))
+               (love.graphics.rectangle :fill x y size size))))
          )
  :update (fn update [dt set-mode]
            (tset world "time" (+ (. world "time") dt))
