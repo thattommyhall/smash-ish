@@ -1,27 +1,54 @@
 (import-macros {: incf} :sample-macros)
+(local lume (require :lib.lume))
 
-(var counter 0)
-(var time 0)
+(var world {"counter" 0
+            "time" 0
+            "background_colour" [0 0 0 1]
+            "pos" [50 100]}) ;; x y
 
 (love.graphics.setNewFont 30)
 
 (local (major minor revision) (love.getVersion))
 
+(fn decide-direction [w a s d]
+  (if (> (lume.count [w a s d] #$) 2)
+      :nothing
+      (case [w a s d]
+        [true true _ _] :upleft
+        [true _ _ true] :upright
+        [_ true true _] :downleft
+        [_ _ true true] :downright
+        [true _ _ _] :up
+        [_ true _ _] :left
+        [_ _ true _] :down
+        [_ _ _ true] :right
+        [_ _ _ _] :nothing
+        )))
+
 {:draw (fn draw [message]
          (local (w h _flags) (love.window.getMode))
-         (love.graphics.printf
-          (: "Love Version: %s.%s.%s"
-             :format  major minor revision) 0 10 w :center)
-         (love.graphics.printf
-          (: "This window should close in %0.1f seconds"
-             :format (math.max 0 (- 3 time)))
-          0 (- (/ h 2) 15) w :center))
+         (love.graphics.setColor (unpack (. world "background_colour")))
+         (love.graphics.rectangle :fill 0 0 w h)
+         (love.graphics.setColor 1 0 0 1) ;; red
+         (let [(x y) (unpack (. world "pos"))]
+           (love.graphics.rectangle :fill x y 64 64))
+         )
  :update (fn update [dt set-mode]
-             (if (< counter 65535)
-                 (set counter (+ counter 1))
-                 (set counter 0))
-             (incf time dt)
-             (when (> time 3)
-               (love.event.quit)))
+           (if (< (. world "counter") 60)
+               (tset world "counter" (+ (. world "counter") 1))
+               (tset world "counter" 0))
+           (tset world "time" (+ (. world "time") dt))
+           )
  :keypressed (fn keypressed [key set-mode]
-                 (love.event.quit))}
+               (let [w (love.keyboard.isDown "w")
+                     a (love.keyboard.isDown "a")
+                     s (love.keyboard.isDown "s")
+                     d (love.keyboard.isDown "d")
+                     direction (decide-direction w a s d)]
+                 (print direction))
+               ;;(case key
+                 ;;"w"
+                 ;;"a"
+                 ;;"s"
+                 ;;"d"
+                 )}
