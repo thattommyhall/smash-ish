@@ -10,10 +10,10 @@
 
 (local (major minor revision) (love.getVersion))
 
-(fn decide-direction [w a s d]
-  (if (> (lume.count [w a s d] #$) 2)
+(fn decide-direction [...]
+  (if (> (lume.count [...] #$) 2)
       :nothing
-      (case [w a s d]
+      (case [...]
         [true true _ _] :upleft
         [true _ _ true] :upright
         [_ true true _] :downleft
@@ -46,9 +46,4 @@
                      d (love.keyboard.isDown "d")
                      direction (decide-direction w a s d)]
                  (print direction))
-               ;;(case key
-                 ;;"w"
-                 ;;"a"
-                 ;;"s"
-                 ;;"d"
                  )}
