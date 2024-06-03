@@ -8,6 +8,10 @@
                 "pos" [50 100] ;; x y
                 "speed" 30
                 "direction" :up
+                "pressed" {:w false
+                           :s false
+                           :a false
+                           :d false}
             }
             }) 
 
@@ -27,22 +31,6 @@
     :nothing [0 0]
 })
 
-(fn update-player [p dt]
-    (let [
-        pos (. p "pos" )
-        speed (. p "speed" )
-        direction (.  p "direction")
-        [old_x old_y] (. p "pos" )
-        [dx dy] (. d-map direction)
-        new_pos [
-            (+ old_x (* dt dx speed))
-            (+ old_y (* dt dy speed))
-        ]
-    ]
-        (tset p "pos" new_pos)
-    )
-    )
-
 (fn decide-direction [...]
   (if (> (lume.count [...] #$) 2)
       :nothing
@@ -58,6 +46,37 @@
         [_ _ _ _] :nothing
         )))
 
+(fn update-player [p dt]
+    (let [
+        pos (. p "pos" )
+        speed (. p "speed" )
+        [w a s d] [
+            (. p "pressed" "w")
+            (. p "pressed" "a")
+            (. p "pressed" "s")
+            (. p "pressed" "d")
+        ]
+        direction (decide-direction w a s d)
+        [old_x old_y] (. p "pos" )
+        [dx dy] (. d-map direction)
+        new_pos [
+            (+ old_x (* dt dx speed))
+            (+ old_y (* dt dy speed))
+        ]
+    ]
+        (tset p "pos" new_pos)
+    )
+    )
+
+
+
+(local valid-keys {
+    "w" true
+    "s" true
+    "a" true
+    "d" true
+})
+
 {:draw (fn draw [message]
          (local (w h _flags) (love.window.getMode))
          (love.graphics.setColor (unpack (. world "background_colour")))
@@ -71,10 +90,13 @@
            (update-player (. world "p1") dt)
            )
  :keypressed (fn keypressed [key set-mode]
-               (let [w (love.keyboard.isDown "w")
-                     a (love.keyboard.isDown "a")
-                     s (love.keyboard.isDown "s")
-                     d (love.keyboard.isDown "d")
-                     direction (decide-direction w a s d)]
-                 (tset (. world "p1") "direction" direction)
-                 ))}
+               (print "pressed:" key)
+               (if (. valid-keys key)
+                 (tset (. world "p1" "pressed") key true)
+                 ))
+ :keyreleased (fn keyreleased [key set-mode]
+                (print "released:" key)
+                (if (. valid-keys key)
+                 (tset (. world "p1" "pressed") key false)
+                 ))
+}
