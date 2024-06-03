@@ -4,11 +4,44 @@
 (local world {"counter" 0
             "time" 0
             "background_colour" [0 0 0 1]
-            "pos" [50 100]}) ;; x y
+            "p1" {
+                "pos" [50 100] ;; x y
+                "speed" 30
+                "direction" :up
+            }
+            }) 
 
 (love.graphics.setNewFont 30)
 
 (local (major minor revision) (love.getVersion))
+
+(local d-map {
+    :up [0 -1]
+    :down [0 1]
+    :left [-1 0]
+    :right [1 0]
+    :upleft [-1 -1]
+    :upright [1 -1]
+    :downleft [-1 1]
+    :downright [1 1]
+    :nothing [0 0]
+})
+
+(fn update-player [p dt]
+    (let [
+        pos (. p "pos" )
+        speed (. p "speed" )
+        direction (.  p "direction")
+        [old_x old_y] (. p "pos" )
+        [dx dy] (. d-map direction)
+        new_pos [
+            (+ old_x (* dt dx speed))
+            (+ old_y (* dt dy speed))
+        ]
+    ]
+        (tset p "pos" new_pos)
+    )
+    )
 
 (fn decide-direction [...]
   (if (> (lume.count [...] #$) 2)
@@ -30,14 +63,12 @@
          (love.graphics.setColor (unpack (. world "background_colour")))
          (love.graphics.rectangle :fill 0 0 w h)
          (love.graphics.setColor 1 0 0 1) ;; red
-         (let [(x y) (unpack (. world "pos"))]
-           (love.graphics.rectangle :fill x y 64 64))
+         (let [(x y) (unpack (. (. world "p1") "pos"))]
+           (love.graphics.rectangle :fill x y 16 16))
          )
  :update (fn update [dt set-mode]
-           (if (< (. world "counter") 60)
-               (tset world "counter" (+ (. world "counter") 1))
-               (tset world "counter" 0))
            (tset world "time" (+ (. world "time") dt))
+           (update-player (. world "p1") dt)
            )
  :keypressed (fn keypressed [key set-mode]
                (let [w (love.keyboard.isDown "w")
@@ -45,5 +76,5 @@
                      s (love.keyboard.isDown "s")
                      d (love.keyboard.isDown "d")
                      direction (decide-direction w a s d)]
-                 (print direction))
-                 )}
+                 (tset (. world "p1") "direction" direction)
+                 ))}
