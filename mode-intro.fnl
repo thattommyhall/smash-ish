@@ -6,35 +6,51 @@
 (local (major minor revision) (love.getVersion))
 (local (width height _flags) (love.window.getMode))
 
-(fn generate-enemy [size]
-  {"pos" [(math.random (- width size)) (math.random (- height size))]
-   "size" size
-   "colour" [(math.random) (math.random) (math.random) 1]
-})
+(local entities (bump.newWorld))
+(local enemies [])
 
-(local world {
-            "counter" 0
-            "time" 0
-            "background_colour" [0 0 0 1]
-            "p1" {
-                "pos" [50 100] ;; x y
-                "speed" 30
+(fn generate-enemy [size]
+(let [enemy {
+        "x" (math.random (- width size))
+        "y" (math.random (- height size))
+        "w" size
+        "h" size
+        "colour" [(math.random) (math.random) (math.random) 1]
+        "speed" 0
+      }
+]
+  (table.insert enemies enemy)
+  (entities:add enemy (. enemy "x") (. enemy "y") (. enemy "w") (. enemy "h"))
+))
+
+(for [i 1 5]
+  (generate-enemy 32)
+)
+
+(local p1  {
+                "x" 100 
+                "y" 50
+                "w" 32
+                "h" 32
+                "colour" [1 0 0 1]
+                "speed" 60
                 "direction" :up
                 "pressed" {:w false
                            :s false
                            :a false
                            :d false}
-                "size" 32
-                }
-            "enemies" [(generate-enemy 32) (generate-enemy 64) (generate-enemy 64)]
-            ""
+                })
+
+
+(local world {
+            "counter" 0
+            "time" 0
+            "background_colour" [0 0 0 1]
             })
 
+(entities:add p1 (. p1 "x") (. p1 "y") (. p1 "w") (. p1 "h"))
+
 (love.graphics.setNewFont 30)
-
-
-
-
 
 (local d-map {
     :up [0 -1]
@@ -65,7 +81,8 @@
 
 (fn update-player [p dt]
     (let [
-        pos (. p "pos" )
+        x (. p "x")
+        y (. p "y")
         speed (. p "speed" )
         [w a s d] [
             (. p "pressed" "w")
@@ -74,14 +91,13 @@
             (. p "pressed" "d")
         ]
         direction (decide-direction w a s d)
-        [old_x old_y] (. p "pos" )
         [dx dy] (. d-map direction)
-        new_pos [
-            (+ old_x (* dt dx speed))
-            (+ old_y (* dt dy speed))
-        ]
+        goal_x (+ x (* dx dt speed))
+        goal_y (+ y (* dy dt speed))
+        (new_x new_y _ _) (entities:move p goal_x goal_y)
     ]
-        (tset p "pos" new_pos)
+        (tset p "x" new_x)
+        (tset p "y" new_y)
     )
     )
 
@@ -94,33 +110,38 @@
     "d" true
 })
 
+(fn draw-entity [e]
+    (let [x (. e "x")
+          y (. e "y")
+          w (. e "w")
+          h (. e "h")
+          colour (. e "colour")]
+        (love.graphics.setColor  (unpack colour))
+        (love.graphics.rectangle :fill x y w h)
+))
+
 {:draw (fn draw [message]
          (love.graphics.setColor (unpack (. world "background_colour")))
          (love.graphics.rectangle :fill 0 0 width height)
-         (love.graphics.setColor 1 0 0 1) ;; red
-         (let [(x y) (unpack (.  world "p1" "pos"))
-               size (. world "p1" "size")]
-           (love.graphics.rectangle :fill x y size size))
-         (let [enemies (. world "enemies")]
-           (each [_ enemy (ipairs enemies)]
-             (let [size (. enemy "size")
-                   colour (. enemy "colour")
-                   [x y] (. enemy "pos")]
-               (love.graphics.setColor (unpack colour))
-               (love.graphics.rectangle :fill x y size size))))
-         )
+         (draw-entity p1)
+         (each [_ enemy (ipairs enemies)]
+            (draw-entity enemy)
+         
+         ))
+         
+         
  :update (fn update [dt set-mode]
            (tset world "time" (+ (. world "time") dt))
-           (update-player (. world "p1") dt)
+           (update-player p1 dt)
            )
  :keypressed (fn keypressed [key set-mode]
                (print "pressed:" key)
                (if (. valid-keys key)
-                 (tset (. world "p1" "pressed") key true)
+                 (tset (. p1 "pressed") key true)
                  ))
  :keyreleased (fn keyreleased [key set-mode]
                 (print "released:" key)
                 (if (. valid-keys key)
-                 (tset (. world "p1" "pressed") key false)
+                 (tset (. p1 "pressed") key false)
                  ))
 }
