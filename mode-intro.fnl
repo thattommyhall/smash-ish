@@ -38,7 +38,8 @@
 (for [i 1 5]
   (generate-enemy 32))
 
-(local p1 {:x 50
+(local p1 {:type :player
+           :x 50
            :y 100
            :w 32
            :h 32
