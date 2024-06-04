@@ -35,6 +35,11 @@
 
 (entities:add p1 p1.x p1.y p1.w p1.h)
 
+(entities:add {:type :wall :label :top} 0 0 width 1)
+(entities:add {:type :wall :label :bottom} 0 (- height 1) width 1)
+(entities:add {:type :wall :label :left} 0 0 1 height)
+(entities:add {:type :wall :label :right} (- width 1) 0 1 height)
+
 (love.graphics.setNewFont 30)
 
 (local d-map {:up [0 -1]
