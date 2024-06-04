@@ -6,9 +6,8 @@
 (local (major minor revision) (love.getVersion))
 (local (width height _flags) (love.window.getMode))
 
-(local entities (bump.newWorld))
-(local enemies [])
-(local bullets [])
+(local bumpworld (bump.newWorld))
+(local entities [])
 (local BLACK [])
 (local WHITE [255 255 255 1])
 
@@ -19,9 +18,17 @@
                :h size
                :type :enemy
                :colour [(math.random) (math.random) (math.random) 1]
-               :speed 0}]
-    (table.insert enemies enemy)
-    (entities:add enemy enemy.x enemy.y enemy.w enemy.h)))
+               :speed 20
+               :direction (lume.randomchoice [:up
+                                              :down
+                                              :left
+                                              :right
+                                              :upright
+                                              :upleft
+                                              :downright
+                                              :downleft])}]
+    (table.insert entities enemy)
+    (bumpworld:add enemy enemy.x enemy.y enemy.w enemy.h)))
 
 (fn shoot-bullet [x y direction speed]
   (let [bullet {:type :bullet
@@ -32,8 +39,8 @@
                 :colour WHITE
                 : speed
                 : direction}]
-    (table.insert bullets bullet)
-    (entities:add bullet bullet.x bullet.y bullet.w bullet.h)))
+    (table.insert entities bullet)
+    (bumpworld:add bullet bullet.x bullet.y bullet.w bullet.h)))
 
 (for [i 1 5]
   (generate-enemy 32))
@@ -56,19 +63,19 @@
                      :k false
                      :l false}
            :last-fired 0
-           :firing-rate 0.5})
+           :firing-rate 0.25})
 
 (shoot-bullet (+ p1.x (/ p1.w 2)) (+ p1.y (/ p1.h 2)) :right 100)
 (shoot-bullet (+ p1.x (/ p1.w 2)) (+ p1.y (/ p1.h 2)) :down 100)
 
 (local world {:time 0 :background_colour [0 0 0 1]})
 
-(entities:add p1 p1.x p1.y p1.w p1.h)
+(bumpworld:add p1 p1.x p1.y p1.w p1.h)
 
-(entities:add {:type :wall :label :top} 0 0 width 1)
-(entities:add {:type :wall :label :bottom} 0 (- height 1) width 1)
-(entities:add {:type :wall :label :left} 0 0 1 height)
-(entities:add {:type :wall :label :right} (- width 1) 0 1 height)
+(bumpworld:add {:type :wall :label :top} 0 0 width 1)
+(bumpworld:add {:type :wall :label :bottom} 0 (- height 1) width 1)
+(bumpworld:add {:type :wall :label :left} 0 0 1 height)
+(bumpworld:add {:type :wall :label :right} (- width 1) 0 1 height)
 
 (love.graphics.setNewFont 30)
 
@@ -108,46 +115,51 @@
         [dx dy] (. d-map direction)
         goal_x (+ x (* dx dt speed))
         goal_y (+ y (* dy dt speed))
-        (new_x new_y cols ncols) (entities:move p goal_x goal_y
-                                                (ignore :bullet))
+        (new_x new_y cols ncols) (bumpworld:move p goal_x goal_y
+                                                 (ignore :bullet))
         since-fired (- world.time (. p :last-fired))
         should-shoot (> since-fired (. p :firing-rate))
         has-gun-direction (not= gun-direction :nothing)]
     (if (> (length cols) 0)
         (each [_ col (ipairs cols)]
           (if (= :enemy col.other.type)
-              (love.event.quit))))
+              (do
+                (print "you hit a baddy")
+                ;(love.event.quit)
+                ))))
     (if (and should-shoot has-gun-direction)
         (do
-          (shoot-bullet x y gun-direction 100)
+          (shoot-bullet x y gun-direction 200)
           (tset p :last-fired world.time)))
     (tset p :x new_x)
     (tset p :y new_y)))
 
-(fn remove-enemy [enemy]
-  (entities:remove enemy)
-  (lume.remove enemies enemy))
+(fn remove-entity [e]
+  (if (bumpworld:hasItem e)
+      (bumpworld:remove e))
+  (lume.remove entities e))
 
-(fn remove-bullet [bullet]
-  (entities:remove bullet)
-  (lume.remove bullets bullet))
-
-(fn update-bullet [b dt]
-  (let [{: x : y : speed : direction} b
+(fn update-entity [e dt]
+  (let [{: x : y : speed : direction} e
         [dx dy] (. d-map direction)
         goal_x (+ x (* dx dt speed))
         goal_y (+ y (* dy dt speed))
-        (new_x new_y cols ncols) (entities:move b goal_x goal_y
-                                                (ignore :player))]
-    (if (> (length cols) 0)
-        (each [_ col (ipairs cols)]
-          (case col.other.type
-            :enemy (do
-                     (remove-enemy col.other)
-                     (generate-enemy 64))
-            :wall (remove-bullet b))))
-    (tset b :x new_x)
-    (tset b :y new_y)))
+        ignore-fn (case e.type
+                    :player (ignore :bullet)
+                    :bullet (ignore :player)
+                    _ nil)
+        (new_x new_y cols ncols) (bumpworld:move e goal_x goal_y ignore-fn)]
+    (case e.type
+      :bullet (if (> (length cols) 0)
+                  (each [_ col (ipairs cols)]
+                    (case col.other.type
+                      :enemy (do
+                               (remove-entity col.other)
+                               (generate-enemy 64))
+                      :wall (remove-entity e))))
+      :enemy [])
+    (tset e :x new_x)
+    (tset e :y new_y)))
 
 (local valid-keys {:w true
                    :s true
@@ -166,15 +178,13 @@
 {:draw (fn draw [message]
          (love.graphics.setColor (unpack world.background_colour))
          (love.graphics.rectangle :fill 0 0 width height)
-         (draw-entity p1)
-         (each [_ enemy (ipairs enemies)]
-           (draw-entity enemy))
-         (each [_ bullet (ipairs bullets)]
-           (draw-entity bullet)))
+         (each [_ e (ipairs entities)]
+           (draw-entity e))
+         (draw-entity p1))
  :update (fn update [dt set-mode]
            (tset world :time (+ world.time dt))
-           (each [_ bullet (ipairs bullets)]
-             (update-bullet bullet dt))
+           (each [_ e (ipairs entities)]
+             (update-entity e dt))
            (update-player p1 dt))
  :keypressed (fn keypressed [key set-mode]
                (if (. valid-keys key)
