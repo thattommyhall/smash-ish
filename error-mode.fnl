@@ -23,6 +23,8 @@ Press space to return to the previous mode after reloading in the repl.")
     :escape (love.event.quit)
     :space (set-mode state.old-mode)))
 
+(fn keyreleased [key set-mode])
+
 (fn color-msg [msg]
   ;; convert compiler's ansi escape codes to love2d-friendly codes
   (case (msg:match "(.*)\027%[7m(.*)\027%[0m(.*)")
@@ -37,4 +39,4 @@ Press space to return to the previous mode after reloading in the repl.")
   (set state.msg (color-msg msg))
   (set state.traceback traceback))
 
-{: draw : keypressed : activate}
+{: draw : keypressed : activate : keyreleased}
