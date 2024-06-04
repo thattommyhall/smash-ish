@@ -124,7 +124,9 @@
     (if (> (length cols) 0)
         (each [_ col (ipairs cols)]
           (case col.other.type
-            :enemy (remove-enemy col.other)
+            :enemy (do
+                     (remove-enemy col.other)
+                     (generate-enemy 64))
             :wall (remove-bullet b))))
     (tset b :x new_x)
     (tset b :y new_y)))
