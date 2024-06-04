@@ -152,10 +152,12 @@
              (update-bullet bullet dt))
            (update-player p1 dt))
  :keypressed (fn keypressed [key set-mode]
-               (print "pressed:" key)
                (if (. valid-keys key)
-                   (tset p1.pressed key true)))
+                   (do
+                     (print "pressed:" key)
+                     (tset p1.pressed key true))))
  :keyreleased (fn keyreleased [key set-mode]
-                (print "released:" key)
                 (if (. valid-keys key)
-                    (tset p1.pressed key false)))}
+                    (do
+                      (print "released:" key)
+                      (tset p1.pressed key false))))}
