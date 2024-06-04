@@ -7,7 +7,8 @@
 
 (local state {:msg "" :traceback "" :old-mode :intro})
 
-(local explanation "Press escape to quit.
+(local explanation
+       "Press escape to quit.
 Press space to return to the previous mode after reloading in the repl.")
 
 (fn draw []
@@ -25,9 +26,7 @@ Press space to return to the previous mode after reloading in the repl.")
 (fn color-msg [msg]
   ;; convert compiler's ansi escape codes to love2d-friendly codes
   (case (msg:match "(.*)\027%[7m(.*)\027%[0m(.*)")
-    (pre selected post) [[1 1 1] pre
-                         [1 0.2 0.2] selected
-                         [1 1 1] post]
+    (pre selected post) [[1 1 1] pre [1 0.2 0.2] selected [1 1 1] post]
     _ msg))
 
 (fn activate [old-mode msg traceback]
