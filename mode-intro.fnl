@@ -17,7 +17,7 @@
                :colour [(math.random) (math.random) (math.random) 1]
                :speed 0}]
     (table.insert enemies enemy)
-    (entities:add enemy (. enemy :x) (. enemy :y) (. enemy :w) (. enemy :h))))
+    (entities:add enemy enemy.x enemy.y enemy.w enemy.h)))
 
 (for [i 1 5]
   (generate-enemy 32))
@@ -33,7 +33,7 @@
 
 (local world {:counter 0 :time 0 :background_colour [0 0 0 1]})
 
-(entities:add p1 (. p1 :x) (. p1 :y) (. p1 :w) (. p1 :h))
+(entities:add p1 p1.x p1.y p1.w p1.h)
 
 (love.graphics.setNewFont 30)
 
@@ -63,7 +63,7 @@
 
 (fn update-player [p dt]
   (let [{: x : y : speed} p
-        {: w : a : s : d} (. p :pressed)
+        {: w : a : s : d} p.pressed
         direction (decide-direction w a s d)
         [dx dy] (. d-map direction)
         goal_x (+ x (* dx dt speed))
@@ -80,19 +80,19 @@
     (love.graphics.rectangle :fill x y w h)))
 
 {:draw (fn draw [message]
-         (love.graphics.setColor (unpack (. world :background_colour)))
+         (love.graphics.setColor (unpack world.background_colour))
          (love.graphics.rectangle :fill 0 0 width height)
          (draw-entity p1)
          (each [_ enemy (ipairs enemies)]
            (draw-entity enemy)))
  :update (fn update [dt set-mode]
-           (tset world :time (+ (. world :time) dt))
+           (tset world :time (+ world.time dt))
            (update-player p1 dt))
  :keypressed (fn keypressed [key set-mode]
                (print "pressed:" key)
                (if (. valid-keys key)
-                   (tset (. p1 :pressed) key true)))
+                   (tset p1.pressed key true)))
  :keyreleased (fn keyreleased [key set-mode]
                 (print "released:" key)
                 (if (. valid-keys key)
-                    (tset (. p1 :pressed) key false)))}
+                    (tset p1.pressed key false)))}
