@@ -86,6 +86,10 @@
         [_ _ _ true] :right
         [_ _ _ _] :nothing)))
 
+(fn ignore [t]
+  (fn [item other]
+    (if (= other.type t) :cross :slide)))
+
 (fn update-player [p dt]
   (let [{: x : y : speed} p
         {: w : a : s : d} p.pressed
@@ -93,7 +97,8 @@
         [dx dy] (. d-map direction)
         goal_x (+ x (* dx dt speed))
         goal_y (+ y (* dy dt speed))
-        (new_x new_y cols ncols) (entities:move p goal_x goal_y)]
+        (new_x new_y cols ncols) (entities:move p goal_x goal_y
+                                                (ignore :bullet))]
     (if (> (length cols) 0)
         (each [_ col (ipairs cols)]
           (if (= :enemy col.other.type)
@@ -114,7 +119,8 @@
         [dx dy] (. d-map direction)
         goal_x (+ x (* dx dt speed))
         goal_y (+ y (* dy dt speed))
-        (new_x new_y cols ncols) (entities:move b goal_x goal_y)]
+        (new_x new_y cols ncols) (entities:move b goal_x goal_y
+                                                (ignore :player))]
     (if (> (length cols) 0)
         (each [_ col (ipairs cols)]
           (case col.other.type
