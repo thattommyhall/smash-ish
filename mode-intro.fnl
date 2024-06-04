@@ -14,6 +14,7 @@
                :y (math.random (- height size))
                :w size
                :h size
+               :type :enemy
                :colour [(math.random) (math.random) (math.random) 1]
                :speed 0}]
     (table.insert enemies enemy)
@@ -39,6 +40,7 @@
 (entities:add {:type :wall :label :bottom} 0 (- height 1) width 1)
 (entities:add {:type :wall :label :left} 0 0 1 height)
 (entities:add {:type :wall :label :right} (- width 1) 0 1 height)
+
 
 (love.graphics.setNewFont 30)
 
@@ -73,7 +75,11 @@
         [dx dy] (. d-map direction)
         goal_x (+ x (* dx dt speed))
         goal_y (+ y (* dy dt speed))
-        (new_x new_y _ _) (entities:move p goal_x goal_y)]
+        (new_x new_y cols ncols) (entities:move p goal_x goal_y)]
+    (if (> (length cols) 0)
+      (each [_ col (ipairs cols)]
+        (if (= :enemy col.other.type)
+          (love.event.quit))))
     (tset p :x new_x)
     (tset p :y new_y)))
 
