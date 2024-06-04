@@ -149,7 +149,14 @@
     (tset b :x new_x)
     (tset b :y new_y)))
 
-(local valid-keys {:w true :s true :a true :d true})
+(local valid-keys {:w true
+                   :s true
+                   :a true
+                   :d true
+                   :i true
+                   :j true
+                   :k true
+                   :l true})
 
 (fn draw-entity [e]
   (let [{: x : y : w : h : colour} e]
