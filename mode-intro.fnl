@@ -46,10 +46,20 @@
            :colour [1 0 0 1]
            :speed 60
            :direction :up
-           :pressed {:w false :s false :a false :d false}
-           :last_fired 0})
+           :gun-direction :right
+           :pressed {:w false
+                     :s false
+                     :a false
+                     :d false
+                     :i false
+                     :j false
+                     :k false
+                     :l false}
+           :last-fired 0
+           :firing-rate 0.5})
 
 (shoot-bullet (+ p1.x (/ p1.w 2)) (+ p1.y (/ p1.h 2)) :right 100)
+(shoot-bullet (+ p1.x (/ p1.w 2)) (+ p1.y (/ p1.h 2)) :down 100)
 
 (local world {:time 0 :background_colour [0 0 0 1]})
 
@@ -92,17 +102,25 @@
 
 (fn update-player [p dt]
   (let [{: x : y : speed} p
-        {: w : a : s : d} p.pressed
+        {: w : a : s : d : i : j : k : l} p.pressed
         direction (decide-direction w a s d)
+        gun-direction (decide-direction i j k l)
         [dx dy] (. d-map direction)
         goal_x (+ x (* dx dt speed))
         goal_y (+ y (* dy dt speed))
         (new_x new_y cols ncols) (entities:move p goal_x goal_y
-                                                (ignore :bullet))]
+                                                (ignore :bullet))
+        since-fired (- world.time (. p :last-fired))
+        should-shoot (> since-fired (. p :firing-rate))
+        has-gun-direction (not= gun-direction :nothing)]
     (if (> (length cols) 0)
         (each [_ col (ipairs cols)]
           (if (= :enemy col.other.type)
               (love.event.quit))))
+    (if (and should-shoot has-gun-direction)
+        (do
+          (shoot-bullet x y gun-direction 100)
+          (tset p :last-fired world.time)))
     (tset p :x new_x)
     (tset p :y new_y)))
 
