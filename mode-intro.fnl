@@ -72,10 +72,10 @@
 
 (bumpworld:add p1 p1.x p1.y p1.w p1.h)
 
-(bumpworld:add {:type :wall :label :top} 0 0 width 1)
-(bumpworld:add {:type :wall :label :bottom} 0 (- height 1) width 1)
-(bumpworld:add {:type :wall :label :left} 0 0 1 height)
-(bumpworld:add {:type :wall :label :right} (- width 1) 0 1 height)
+(bumpworld:add {:type :wall :label :top} 0 -1 width 1)
+(bumpworld:add {:type :wall :label :bottom} 0 height width 1)
+(bumpworld:add {:type :wall :label :left} -1 0 1 height)
+(bumpworld:add {:type :wall :label :right} width 0 1 height)
 
 (love.graphics.setNewFont 30)
 
@@ -154,10 +154,10 @@
                                (generate-enemy 64))
                       :wall (remove-entity e))))
       :enemy (do
-               (let [{: x : y} p1 ;; hardcoded player entity
-                     dx (- x new_x)
-                     dy (- y new_y)]
-                 (tset e :direction (calc-new-dir dx dy)))
+               ;; (let [{: x : y} p1 ;; hardcoded player entity
+               ;;       dx (- x new_x)
+               ;;       dy (- y new_y)]
+               ;;   (tset e :direction (calc-new-dir dx dy)))
                (if (> (length cols) 0)
                    (each [_ col (ipairs cols)]
                      (case col.other.type
