@@ -155,6 +155,7 @@
                     (case col.other.type
                       :enemy (do
                                (remove-entity col.other)
+                               (remove-entity e)
                                (generate-enemy 64))
                       :wall (remove-entity e))))
       :enemy [])
