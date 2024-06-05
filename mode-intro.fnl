@@ -107,32 +107,14 @@
   (fn [item other]
     (if (= other.type t) :cross :slide)))
 
-(fn update-player [p dt]
-  (let [{: x : y : speed} p
-        {: w : a : s : d : i : j : k : l} p.pressed
-        direction (decide-direction w a s d)
-        gun-direction (decide-direction i j k l)
-        [dx dy] (. d-map direction)
-        goal_x (+ x (* dx dt speed))
-        goal_y (+ y (* dy dt speed))
-        (new_x new_y cols ncols) (bumpworld:move p goal_x goal_y
-                                                 (ignore :bullet))
-        since-fired (- world.time (. p :last-fired))
-        should-shoot (> since-fired (. p :firing-rate))
-        has-gun-direction (not= gun-direction :nothing)]
-    (if (> (length cols) 0)
-        (each [_ col (ipairs cols)]
-          (if (= :enemy col.other.type)
-              (do
-                (print "you hit a baddy")
-                ;(love.event.quit)
-                ))))
-    (if (and should-shoot has-gun-direction)
-        (do
-          (shoot-bullet x y gun-direction 200)
-          (tset p :last-fired world.time)))
-    (tset p :x new_x)
-    (tset p :y new_y)))
+
+(fn entity-center [e]
+  (let [{: x : y : w : h} e] ;; assumes entity has x,y,w,h properties
+    (values (+ x (/ w 2)) (+ y (/ h 2)))))
+
+(fn center-entity-on [x y w h]
+  "Given a coordinate and an (rectangular) entity's width and height, return the x,y coordinates at which it should be drawn."
+  (values (- x (/ w 2)) (- y (/ h 2)))) ;; no validation that this is in bounds yet!
 
 (fn remove-entity [e]
   (if (bumpworld:hasItem e)
@@ -161,6 +143,34 @@
       :enemy [])
     (tset e :x new_x)
     (tset e :y new_y)))
+
+(fn update-player [p dt]
+  (let [{: x : y : speed} p
+        {: w : a : s : d : i : j : k : l} p.pressed
+        direction (decide-direction w a s d)
+        gun-direction (decide-direction i j k l)
+        [dx dy] (. d-map direction)
+        goal_x (+ x (* dx dt speed))
+        goal_y (+ y (* dy dt speed))
+        (new_x new_y cols ncols) (bumpworld:move p goal_x goal_y
+                                                 (ignore :bullet))
+        since-fired (- world.time (. p :last-fired))
+        should-shoot (> since-fired (. p :firing-rate))
+        has-gun-direction (not= gun-direction :nothing)]
+    (if (> (length cols) 0)
+        (each [_ col (ipairs cols)]
+          (if (= :enemy col.other.type)
+              (do
+                (print "you hit a baddy")
+                ;(love.event.quit)
+                ))))
+    (if (and should-shoot has-gun-direction)
+        (let [(p_center_x p_center_y) (entity-center p)
+              (bullet_x bullet_y) (center-entity-on p_center_x p_center_y 8 8)] ;; hardcoded bullet w & h!
+          (shoot-bullet bullet_x bullet_y gun-direction 200)
+          (tset p :last-fired world.time)))
+    (tset p :x new_x)
+    (tset p :y new_y)))
 
 (local valid-keys {:w true
                    :s true
