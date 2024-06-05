@@ -107,10 +107,24 @@
   (fn [item other]
     (if (= other.type t) :cross :slide)))
 
-
 (fn entity-center [e]
   (let [{: x : y : w : h} e] ;; assumes entity has x,y,w,h properties
     (values (+ x (/ w 2)) (+ y (/ h 2)))))
+
+(fn calc-new-dir [dx dy]
+  (case [(lume.round (/ dx (+ (math.abs dx) 0.00001)) 1)
+         (lume.round (/ dy (+ (math.abs dy) 0.00001)) 1)
+         ]
+      [0 -1] :up
+      [0 1] :down
+      [-1 0] :left
+      [1 0] :right
+      [-1 -1] :upleft
+      [1 -1] :upright
+      [-1 1] :downleft
+      [1 1] :downright
+      [0 0] :nothing
+    ))
 
 (fn center-entity-on [x y w h]
   "Given a coordinate and an (rectangular) entity's width and height, return the x,y coordinates at which it should be drawn."
@@ -129,6 +143,7 @@
         ignore-fn (case e.type
                     :player (ignore :bullet)
                     :bullet (ignore :player)
+                    :enemy (fn [item other] (if (= other.type :wall) :bounce))
                     _ nil)
         (new_x new_y cols ncols) (bumpworld:move e goal_x goal_y ignore-fn)]
     (case e.type
@@ -140,7 +155,14 @@
                                (remove-entity e)
                                (generate-enemy 64))
                       :wall (remove-entity e))))
-      :enemy [])
+      :enemy (if (> (length cols) 0)
+                 (each [_ col (ipairs cols)]
+                   (case col.other.type
+                     :wall (let [{: x : y} col.touch
+                                 dx (- new_x x)
+                                 dy (- new_y y)]
+                             (tset e :direction (calc-new-dir dx dy)))))
+                 ))
     (tset e :x new_x)
     (tset e :y new_y)))
 
