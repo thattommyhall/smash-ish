@@ -60,8 +60,9 @@
   (let [bullet {:type :bullet
                 : x
                 : y
-                :w 8
-                :h 8
+                :w 16
+                :h 16
+                :scale 2
                 :colour [0 1 0 1]
                 : speed
                 : direction
@@ -80,8 +81,8 @@
 (local p1 {:type :player
            :x 50
            :y 100
-           :w 32
-           :h 32
+           :w 64
+           :h 64
            :colour [1 0 0 1]
            :speed 60
            :direction :up
@@ -96,6 +97,7 @@
                      :l false}
            :last-fired 0
            :firing-rate 0.25
+           :scale 2
            :animations {:up (new-animation (love.graphics.newImage "assets/wizard up.png")
                                            32 32)
                         :down (new-animation (love.graphics.newImage "assets/wizard down.png")
