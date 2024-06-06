@@ -2,6 +2,7 @@
 (local lume (require :lib.lume))
 (local bump (require :lib.bump))
 (local inspect (require :lib.inspect))
+(local background (love.graphics.newImage "assets/backgrounds/nightbackgroundwithmoon.png"))
 
 (local (major minor revision) (love.getVersion))
 (local (width height _flags) (love.window.getMode))
@@ -288,8 +289,8 @@
                           orientation sx sy))))
 
 {:draw (fn draw [message]
-         (love.graphics.setColor (unpack world.background_colour))
-         (love.graphics.rectangle :fill 0 0 width height)
+         (love.graphics.setColor 1 1 1 1)
+         (love.graphics.draw background 0 0)
          (love.graphics.setColor 1 1 1 1)
          (love.graphics.printf (: "Spiceyness Level: %s" :format
                                   (* (lume.count entities
