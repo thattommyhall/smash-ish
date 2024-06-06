@@ -14,6 +14,9 @@
 (local logos (icollect [_ name (ipairs (love.filesystem.getDirectoryItems :assets/logos))]
                (love.graphics.newImage (.. :assets/logos/ name))))
 
+(var enemy-speed 20)
+(var player-speed 60)
+
 (fn pp [e]
   (print (inspect e)))
 
@@ -40,7 +43,7 @@
                :h size
                :type :enemy
                :colour [(math.random) (math.random) (math.random) 1]
-               :speed 20
+               :speed enemy-speed
                :life 1
                :scale 0.375
                :animations {:logo (new-animation logo 128 128)}
@@ -84,7 +87,7 @@
            :w 64
            :h 64
            :colour [1 0 0 1]
-           :speed 60
+           :speed player-speed
            :direction :up
            :gun-direction :right
            :pressed {:w false
@@ -198,6 +201,11 @@
                                    (tset col.other :life (- col.other.life 1))
                                    (do
                                      (remove-entity col.other)
+                                     (if (< (math.random) 0.5)
+                                         (print "getting harder")
+                                         (generate-enemy 48)
+                                         (set enemy-speed (+ 1 enemy-speed))
+                                         (set player-speed (+ 1 player-speed)))
                                      (generate-enemy 48)))
                                (remove-entity e))
                       :wall (remove-entity e))))
