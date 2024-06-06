@@ -67,6 +67,6 @@ uploadwindows: releases/$(NAME)-$(VERSION)-win.zip
 uploadweb: releases/$(NAME)-$(VERSION)-web.zip
 	butler push $^ $(ITCH_ACCOUNT)/$(NAME):web --userversion $(VERSION)
 
-upload: uploadlinux uploadmac uploadwindows
+upload: uploadlinux uploadmac uploadwindows uploadweb
 
-release: linux mac windows upload cleansrc
+release: linux mac windows web upload
