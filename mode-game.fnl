@@ -10,7 +10,7 @@
 (local entities [])
 (local BLACK [])
 (local WHITE [255 255 255 1])
-
+(var lost false)
 (local logos (icollect [_ name (ipairs (love.filesystem.getDirectoryItems :assets/logos))]
                (love.graphics.newImage (.. :assets/logos/ name))))
 
@@ -240,7 +240,7 @@
           (if (= :enemy col.other.type)
               (do
                 (print "you hit a baddy")
-                (set-mode :mode-lose)))))
+                (set lost true)))))
     (if (and should-shoot has-gun-direction)
         (let [(p_center_x p_center_y) (entity-center p)
               (bullet_x bullet_y) (center-entity-on p_center_x p_center_y 8 8)]
@@ -298,12 +298,19 @@
                                0 10 width :center)
          (each [_ e (ipairs entities)]
            (draw-entity e))
-         (draw-entity p1))
+         (draw-entity p1)
+         (if lost
+             (do
+               (love.graphics.setColor 1 1 1 1)
+               (love.graphics.printf "YOU LOSE" 0 (- (/ height 2) 15) width
+                                     :center))))
  :update (fn update [dt set-mode]
-           (tset world :time (+ world.time dt))
-           (each [_ e (ipairs entities)]
-             (update-entity e dt))
-           (update-player p1 dt set-mode))
+           (if (not lost)
+               (do
+                 (tset world :time (+ world.time dt))
+                 (each [_ e (ipairs entities)]
+                   (update-entity e dt))
+                 (update-player p1 dt set-mode))))
  :keypressed (fn keypressed [key set-mode]
                (if (. valid-keys key)
                    (do
