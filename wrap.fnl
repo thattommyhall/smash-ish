@@ -15,7 +15,7 @@
       (false msg) (print mode-name "activate error" msg))))
 
 (fn love.load [args]
-  (set-mode :mode-intro)
+  (set-mode :mode-tutorial)
   (canvas:setFilter :nearest :nearest)
   (when (not= :web (. args 1)) (repl.start)))
 
