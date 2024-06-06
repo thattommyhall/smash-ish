@@ -13,6 +13,8 @@
 
 (local logos (love.filesystem.getDirectoryItems :assets/logos))
 
+(fn pp [e]
+  (print (inspect e)))
 
 (fn new-animation [image w h]
   ;; sprite width and height
