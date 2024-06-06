@@ -11,7 +11,8 @@
 (local BLACK [])
 (local WHITE [255 255 255 1])
 
-(local logos [])
+(local logos (love.filesystem.getDirectoryItems :assets/logos))
+
 
 (fn new-animation [image w h]
   ;; sprite width and height
