@@ -296,7 +296,7 @@
          (each [_ e (ipairs entities)]
            (draw-entity e))
          (draw-entity p1)
-         (love.graphics.printf (: "Spiceyness Level: %s" :format
+         (love.graphics.printf (: "Spiciness Level: %s" :format
                                   (* (lume.count entities
                                                  #(not= :bullet $.type))
                                      enemy-speed))
