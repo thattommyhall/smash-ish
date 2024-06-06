@@ -211,11 +211,13 @@
                                      (generate-enemy 48)))
                                (remove-entity e))
                       :wall (remove-entity e))))
-      :enemy (do
-               (let [{: x : y} p1 ;; hardcoded player entity
-                     dx (- x new_x)
-                     dy (- y new_y)]
-                 (tset e :direction (calc-new-dir dx dy)))))
+      :enemy (let [{: x : y} p1 ;; hardcoded player entity
+                   dx (- x new_x)
+                   dy (- y new_y)]
+               (if (> (length cols) 0)
+                   (each [_ col (ipairs cols)]
+                     (case col.other.type :player (set lost true))))
+               (tset e :direction (calc-new-dir dx dy))))
     (if orientation
         (let [two_pi (* 2 math.pi)]
           (if (> orientation two_pi)
