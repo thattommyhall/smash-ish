@@ -12,7 +12,8 @@
 (local WHITE [255 255 255 1])
 
 (local logos (icollect [_ name (ipairs (love.filesystem.getDirectoryItems :assets/logos))]
-               (love.graphics.newImage (.. "assets/logos/" name))))
+               (love.graphics.newImage (.. :assets/logos/ name))))
+
 (fn pp [e]
   (print (inspect e)))
 
@@ -42,7 +43,8 @@
                :speed 20
                :life 3
                :scale 0.375
-               :animations {:logo (new-animation logo 128 128)} ;; size of our logos
+               :animations {:logo (new-animation logo 128 128)}
+               ;; size of our logos
                :direction (lume.randomchoice [:up
                                               :down
                                               :left
@@ -268,16 +270,13 @@
 
 (fn draw-entity [e]
   (let [{: x : y : w : h : colour : life : animations} e]
-    (if animations
-        (let [animation (get-entity-animation e)
-              orientation (or e.orientation 0)
-              sx (or e.scale 1)
-              sy (or e.scale 1)]
-          (love.graphics.draw animation.sprite_sheet (. animation.quads 1) x y
-                              orientation sx sy))
-        (do
-          (love.graphics.setColor (unpack colour))
-          (love.graphics.rectangle :fill x y w h)))))
+    (let [animation (get-entity-animation e)
+          orientation (or e.orientation 0)
+          sx (or e.scale 1)
+          sy (or e.scale 1)]
+      (love.graphics.setColor 1 1 1 1)
+      (love.graphics.draw animation.sprite_sheet (. animation.quads 1) x y
+                          orientation sx sy))))
 
 {:draw (fn draw [message]
          (love.graphics.setColor (unpack world.background_colour))
