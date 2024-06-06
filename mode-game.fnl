@@ -214,7 +214,7 @@
     (tset e :x new_x)
     (tset e :y new_y)))
 
-(fn update-player [p dt]
+(fn update-player [p dt set-mode]
   (let [{: x : y : speed} p
         {: w : a : s : d : i : j : k : l} p.pressed
         direction (decide-direction w a s d)
@@ -232,7 +232,7 @@
           (if (= :enemy col.other.type)
               (do
                 (print "you hit a baddy")
-                (love.event.quit)))))
+                (set-mode :mode-lose)))))
     (if (and should-shoot has-gun-direction)
         (let [(p_center_x p_center_y) (entity-center p)
               (bullet_x bullet_y) (center-entity-on p_center_x p_center_y 8 8)]
@@ -289,7 +289,7 @@
            (tset world :time (+ world.time dt))
            (each [_ e (ipairs entities)]
              (update-entity e dt))
-           (update-player p1 dt))
+           (update-player p1 dt set-mode))
  :keypressed (fn keypressed [key set-mode]
                (if (. valid-keys key)
                    (do
