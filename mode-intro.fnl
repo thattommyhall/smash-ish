@@ -214,10 +214,12 @@
     (love.graphics.rectangle :fill x y w h)
     (if life
         (let [font (love.graphics.getFont)
-              text (love.graphics.newText font)]
-          (text:add life x y 0 0.8 0.8)
+              text (love.graphics.newText font life)
+              (text_w text_h) (text:getDimensions)
+              (e_center_x e_center_y) (entity-center e)
+              (text_x text_y) (center-entity-on e_center_x e_center_y text_w text_h)]
           (love.graphics.setColor 1 1 1 1)
-          (love.graphics.draw text)))))
+          (love.graphics.draw text text_x text_y)))))
 
 {:draw (fn draw [message]
          (love.graphics.setColor (unpack world.background_colour))
