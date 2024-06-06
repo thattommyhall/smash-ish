@@ -52,9 +52,13 @@
                 : y
                 :w 8
                 :h 8
-                :colour WHITE
+                :colour [0 1 0 1]
                 : speed
-                : direction}]
+                : direction
+                :orientation 0
+                :rotation_speed 10
+                :animations {:parens (new-animation (love.graphics.newImage "assets/parens3.png") 12 12)
+                             :lambda (new-animation (love.graphics.newImage "assets/lambda.png") 8 8)}}]
     (table.insert entities bullet)
     (bumpworld:add bullet bullet.x bullet.y bullet.w bullet.h)))
 
@@ -155,7 +159,7 @@
   (lume.remove entities e))
 
 (fn update-entity [e dt]
-  (let [{: x : y : speed : direction} e
+  (let [{: x : y : speed : direction : orientation} e
         [dx dy] (. d-map direction)
         goal_x (+ x (* dx dt speed))
         goal_y (+ y (* dy dt speed))
@@ -182,6 +186,12 @@
                      dy (- y new_y)]
                  (tset e :direction (calc-new-dir dx dy)))
                ))
+    (if orientation
+        (let [two_pi (* 2 math.pi)]
+          (if (> orientation two_pi)
+              (tset e :orientation (- orientation two_pi))
+              (tset e :orientation (+ orientation (* e.rotation_speed dt)))))
+          )
     (tset e :x new_x)
     (tset e :y new_y)))
 
@@ -225,24 +235,27 @@
 
 (fn get-entity-animation [e]
   (let [animations e.animations]
-    (case e.direction
-      :up animations.up
-      :upright animations.up
-      :upleft animations.up
-      :left animations.left
-      :right animations.right
-      :down animations.down
-      :downleft animations.down
-      :downright animations.down
-      :nothing animations.down
-      _ (print "problem in getting animations!"))
+    (case e.type
+      :player (case e.direction
+                :up animations.up
+                :upright animations.up
+                :upleft animations.up
+                :left animations.left
+                :right animations.right
+                :down animations.down
+                :downleft animations.down
+                :downright animations.down
+                :nothing animations.down
+                _ (print "problem in getting animations!"))
+      :bullet animations.lambda)
     ))
 
 (fn draw-entity [e]
   (let [{: x : y : w : h : colour : life : animations} e]
     (if animations
-        (let [animation (get-entity-animation e)]
-          (love.graphics.draw animation.sprite_sheet (. animation.quads 1) x y))
+        (let [animation (get-entity-animation e)
+              orientation (or e.orientation 0)]
+          (love.graphics.draw animation.sprite_sheet (. animation.quads 1) x y orientation))
         (do
           (love.graphics.setColor (unpack colour))
           (love.graphics.rectangle :fill x y w h)
