@@ -41,7 +41,7 @@
                :type :enemy
                :colour [(math.random) (math.random) (math.random) 1]
                :speed 20
-               :life 3
+               :life 1
                :scale 0.375
                :animations {:logo (new-animation logo 128 128)}
                ;; size of our logos
