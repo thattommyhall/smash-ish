@@ -11,14 +11,16 @@
 (local BLACK [])
 (local WHITE [255 255 255 1])
 
+(local logos [])
 
-(fn new-animation [image w h] ;; sprite width and height
-  (let [animation {:sprite_sheet image
-                   :quads []}
+(fn new-animation [image w h]
+  ;; sprite width and height
+  (let [animation {:sprite_sheet image :quads []}
         (img_w img_h) (image:getDimensions)]
     (for [x 0 (- img_h h) h]
       (for [y 0 (- img_w w) w]
-        (table.insert animation.quads (love.graphics.newQuad x y w h img_w img_h))))
+        (table.insert animation.quads
+                      (love.graphics.newQuad x y w h img_w img_h))))
     animation))
 
 (fn generate-enemy [size]
@@ -27,8 +29,8 @@
               (lume.randomchoice [(math.random (- height size) height)
                                   (math.random (- size) 0)])
               (math.random (- size) height))
-        enemy {:x x
-               :y y
+        enemy {: x
+               : y
                :w size
                :h size
                :type :enemy
@@ -57,8 +59,10 @@
                 : direction
                 :orientation 0
                 :rotation_speed 10
-                :animations {:parens (new-animation (love.graphics.newImage "assets/parens3.png") 12 12)
-                             :lambda (new-animation (love.graphics.newImage "assets/lambda.png") 8 8)}}]
+                :animations {:parens (new-animation (love.graphics.newImage :assets/parens3.png)
+                                                    12 12)
+                             :lambda (new-animation (love.graphics.newImage :assets/lambda.png)
+                                                    8 8)}}]
     (table.insert entities bullet)
     (bumpworld:add bullet bullet.x bullet.y bullet.w bullet.h)))
 
@@ -84,11 +88,14 @@
                      :l false}
            :last-fired 0
            :firing-rate 0.25
-           :animations {:up (new-animation (love.graphics.newImage "assets/wizard up.png") 32 32)
-                        :down (new-animation (love.graphics.newImage "assets/wizard down.png") 32 32)
-                        :left (new-animation (love.graphics.newImage "assets/wizard left.png") 32 32)
-                        :right (new-animation (love.graphics.newImage "assets/wizard right.png") 32 32)
-                        }})
+           :animations {:up (new-animation (love.graphics.newImage "assets/wizard up.png")
+                                           32 32)
+                        :down (new-animation (love.graphics.newImage "assets/wizard down.png")
+                                             32 32)
+                        :left (new-animation (love.graphics.newImage "assets/wizard left.png")
+                                             32 32)
+                        :right (new-animation (love.graphics.newImage "assets/wizard right.png")
+                                              32 32)}})
 
 (shoot-bullet (+ p1.x (/ p1.w 2)) (+ p1.y (/ p1.h 2)) :right 100)
 (shoot-bullet (+ p1.x (/ p1.w 2)) (+ p1.y (/ p1.h 2)) :down 100)
@@ -133,12 +140,13 @@
     (if (= other.type t) :cross :slide)))
 
 (fn entity-center [e]
-  (let [{: x : y : w : h} e] ;; assumes entity has x,y,w,h properties
+  (let [{: x : y : w : h} e]
+    ;; assumes entity has x,y,w,h properties
     (values (+ x (/ w 2)) (+ y (/ h 2)))))
 
 (fn calc-new-dir [dx dy]
-  (case [(lume.round (/ dx (+ (math.abs dx) 0.00001)) 1)
-         (lume.round (/ dy (+ (math.abs dy) 0.00001)) 1)]
+  (case [(lume.round (/ dx (+ (math.abs dx) 1e-05)) 1)
+         (lume.round (/ dy (+ (math.abs dy) 1e-05)) 1)]
     [0 -1] :up
     [0 1] :down
     [-1 0] :left
@@ -151,7 +159,9 @@
 
 (fn center-entity-on [x y w h]
   "Given a coordinate and an (rectangular) entity's width and height, return the x,y coordinates at which it should be drawn."
-  (values (- x (/ w 2)) (- y (/ h 2)))) ;; no validation that this is in bounds yet!
+  (values (- x (/ w 2)) (- y (/ h 2))))
+
+;; no validation that this is in bounds yet!
 
 (fn remove-entity [e]
   (if (bumpworld:hasItem e)
@@ -175,23 +185,22 @@
                     (case col.other.type
                       :enemy (do
                                (if (> col.other.life 1)
-                                   (tset col.other "life" (- col.other.life 1))
-                                   (do (remove-entity col.other)
-                                       (generate-enemy 64)))
+                                   (tset col.other :life (- col.other.life 1))
+                                   (do
+                                     (remove-entity col.other)
+                                     (generate-enemy 64)))
                                (remove-entity e))
                       :wall (remove-entity e))))
       :enemy (do
                (let [{: x : y} p1 ;; hardcoded player entity
                      dx (- x new_x)
                      dy (- y new_y)]
-                 (tset e :direction (calc-new-dir dx dy)))
-               ))
+                 (tset e :direction (calc-new-dir dx dy)))))
     (if orientation
         (let [two_pi (* 2 math.pi)]
           (if (> orientation two_pi)
               (tset e :orientation (- orientation two_pi))
-              (tset e :orientation (+ orientation (* e.rotation_speed dt)))))
-          )
+              (tset e :orientation (+ orientation (* e.rotation_speed dt))))))
     (tset e :x new_x)
     (tset e :y new_y)))
 
@@ -217,7 +226,8 @@
                 ))))
     (if (and should-shoot has-gun-direction)
         (let [(p_center_x p_center_y) (entity-center p)
-              (bullet_x bullet_y) (center-entity-on p_center_x p_center_y 8 8)] ;; hardcoded bullet w & h!
+              (bullet_x bullet_y) (center-entity-on p_center_x p_center_y 8 8)]
+          ;; hardcoded bullet w & h!
           (shoot-bullet bullet_x bullet_y gun-direction 200)
           (tset p :last-fired world.time)))
     (tset p :x new_x)
@@ -247,25 +257,25 @@
                 :downright animations.down
                 :nothing animations.down
                 _ (print "problem in getting animations!"))
-      :bullet animations.lambda)
-    ))
+      :bullet animations.lambda)))
 
 (fn draw-entity [e]
   (let [{: x : y : w : h : colour : life : animations} e]
     (if animations
         (let [animation (get-entity-animation e)
               orientation (or e.orientation 0)]
-          (love.graphics.draw animation.sprite_sheet (. animation.quads 1) x y orientation))
+          (love.graphics.draw animation.sprite_sheet (. animation.quads 1) x y
+                              orientation))
         (do
           (love.graphics.setColor (unpack colour))
-          (love.graphics.rectangle :fill x y w h)
-          ))
+          (love.graphics.rectangle :fill x y w h)))
     (if life
         (let [font (love.graphics.getFont)
               text (love.graphics.newText font life)
               (text_w text_h) (text:getDimensions)
               (e_center_x e_center_y) (entity-center e)
-              (text_x text_y) (center-entity-on e_center_x e_center_y text_w text_h)]
+              (text_x text_y) (center-entity-on e_center_x e_center_y text_w
+                                                text_h)]
           (love.graphics.setColor 1 1 1 1)
           (love.graphics.draw text text_x text_y)))))
 
