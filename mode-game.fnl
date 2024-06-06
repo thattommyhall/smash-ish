@@ -2,7 +2,8 @@
 (local lume (require :lib.lume))
 (local bump (require :lib.bump))
 (local inspect (require :lib.inspect))
-(local background (love.graphics.newImage "assets/backgrounds/nightbackgroundwithmoon.png"))
+(local background
+       (love.graphics.newImage :assets/backgrounds/nightbackgroundwithmoon.png))
 
 (local (major minor revision) (love.getVersion))
 (local (width height _flags) (love.window.getMode))
