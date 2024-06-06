@@ -290,6 +290,12 @@
 {:draw (fn draw [message]
          (love.graphics.setColor (unpack world.background_colour))
          (love.graphics.rectangle :fill 0 0 width height)
+         (love.graphics.setColor 1 1 1 1)
+         (love.graphics.printf (: "Spiceyness Level: %s" :format
+                                  (* (lume.count entities
+                                                 #(not= :bullet $.type))
+                                     enemy-speed))
+                               0 10 width :center)
          (each [_ e (ipairs entities)]
            (draw-entity e))
          (draw-entity p1))
