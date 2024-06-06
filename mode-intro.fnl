@@ -12,8 +12,13 @@
 (local WHITE [255 255 255 1])
 
 (fn generate-enemy [size]
-  (let [enemy {:x (math.random (- width size))
-               :y (math.random (- height size))
+  (let [x (math.random (- size) width)
+        y (if (and (>= x 0) (<= x (- width size))) ;; different regions
+              (lume.randomchoice [(math.random (- height size) height)
+                                  (math.random (- size) 0)])
+              (math.random (- size) height))
+        enemy {:x x
+               :y y
                :w size
                :h size
                :type :enemy
@@ -142,7 +147,7 @@
         ignore-fn (case e.type
                     :player (ignore :bullet)
                     :bullet (ignore :player)
-                    :enemy (fn [item other] (if (= other.type :wall) :bounce))
+                    :enemy (ignore :wall)
                     _ nil)
         (new_x new_y cols ncols) (bumpworld:move e goal_x goal_y ignore-fn)]
     (case e.type
@@ -157,17 +162,11 @@
                                (remove-entity e))
                       :wall (remove-entity e))))
       :enemy (do
-               ;; (let [{: x : y} p1 ;; hardcoded player entity
-               ;;       dx (- x new_x)
-               ;;       dy (- y new_y)]
-               ;;   (tset e :direction (calc-new-dir dx dy)))
-               (if (> (length cols) 0)
-                   (each [_ col (ipairs cols)]
-                     (case col.other.type
-                       :wall (let [{: x : y} col.touch
-                                   dx (- new_x x)
-                                   dy (- new_y y)]
-                               (tset e :direction (calc-new-dir dx dy))))))))
+               (let [{: x : y} p1 ;; hardcoded player entity
+                     dx (- x new_x)
+                     dy (- y new_y)]
+                 (tset e :direction (calc-new-dir dx dy)))
+               ))
     (tset e :x new_x)
     (tset e :y new_y)))
 
