@@ -230,8 +230,7 @@
           (if (= :enemy col.other.type)
               (do
                 (print "you hit a baddy")
-                ;(love.event.quit)
-                ))))
+                (love.event.quit)))))
     (if (and should-shoot has-gun-direction)
         (let [(p_center_x p_center_y) (entity-center p)
               (bullet_x bullet_y) (center-entity-on p_center_x p_center_y 8 8)]
