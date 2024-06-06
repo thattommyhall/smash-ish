@@ -10,8 +10,6 @@
 
 (local bumpworld (bump.newWorld))
 (local entities [])
-(local BLACK [])
-(local WHITE [255 255 255 1])
 (var lost false)
 (local logos (icollect [_ name (ipairs (love.filesystem.getDirectoryItems :assets/logos))]
                (love.graphics.newImage (.. :assets/logos/ name))))
