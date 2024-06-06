@@ -19,6 +19,7 @@
                :type :enemy
                :colour [(math.random) (math.random) (math.random) 1]
                :speed 20
+               :life 3
                :direction (lume.randomchoice [:up
                                               :down
                                               :left
@@ -149,9 +150,11 @@
                   (each [_ col (ipairs cols)]
                     (case col.other.type
                       :enemy (do
-                               (remove-entity col.other)
-                               (remove-entity e)
-                               (generate-enemy 64))
+                               (if (> col.other.life 1)
+                                   (tset col.other "life" (- col.other.life 1))
+                                   (do (remove-entity col.other)
+                                       (generate-enemy 64)))
+                               (remove-entity e))
                       :wall (remove-entity e))))
       :enemy (do
                ;; (let [{: x : y} p1 ;; hardcoded player entity
@@ -206,9 +209,15 @@
                    :l true})
 
 (fn draw-entity [e]
-  (let [{: x : y : w : h : colour} e]
+  (let [{: x : y : w : h : colour : life} e]
     (love.graphics.setColor (unpack colour))
-    (love.graphics.rectangle :fill x y w h)))
+    (love.graphics.rectangle :fill x y w h)
+    (if life
+        (let [font (love.graphics.getFont)
+              text (love.graphics.newText font)]
+          (text:add life x y 0 0.8 0.8)
+          (love.graphics.setColor 1 1 1 1)
+          (love.graphics.draw text)))))
 
 {:draw (fn draw [message]
          (love.graphics.setColor (unpack world.background_colour))
