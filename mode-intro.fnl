@@ -277,16 +277,7 @@
                               orientation sx sy))
         (do
           (love.graphics.setColor (unpack colour))
-          (love.graphics.rectangle :fill x y w h)))
-    (if life
-        (let [font (love.graphics.getFont)
-              text (love.graphics.newText font life)
-              (text_w text_h) (text:getDimensions)
-              (e_center_x e_center_y) (entity-center e)
-              (text_x text_y) (center-entity-on e_center_x e_center_y text_w
-                                                text_h)]
-          (love.graphics.setColor 1 1 1 1)
-          (love.graphics.draw text text_x text_y)))))
+          (love.graphics.rectangle :fill x y w h)))))
 
 {:draw (fn draw [message]
          (love.graphics.setColor (unpack world.background_colour))
