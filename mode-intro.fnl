@@ -11,6 +11,16 @@
 (local BLACK [])
 (local WHITE [255 255 255 1])
 
+
+(fn new-animation [image w h] ;; sprite width and height
+  (let [animation {:sprite_sheet image
+                   :quads []}
+        (img_w img_h) (image:getDimensions)]
+    (for [x 0 (- img_h h) h]
+      (for [y 0 (- img_w w) w]
+        (table.insert animation.quads (love.graphics.newQuad x y w h img_w img_h))))
+    animation))
+
 (fn generate-enemy [size]
   (let [x (math.random (- size) width)
         y (if (and (>= x 0) (<= x (- width size))) ;; different regions
@@ -69,7 +79,12 @@
                      :k false
                      :l false}
            :last-fired 0
-           :firing-rate 0.25})
+           :firing-rate 0.25
+           :animations {:up (new-animation (love.graphics.newImage "assets/wizard up.png") 32 32)
+                        :down (new-animation (love.graphics.newImage "assets/wizard down.png") 32 32)
+                        :left (new-animation (love.graphics.newImage "assets/wizard left.png") 32 32)
+                        :right (new-animation (love.graphics.newImage "assets/wizard right.png") 32 32)
+                        }})
 
 (shoot-bullet (+ p1.x (/ p1.w 2)) (+ p1.y (/ p1.h 2)) :right 100)
 (shoot-bullet (+ p1.x (/ p1.w 2)) (+ p1.y (/ p1.h 2)) :down 100)
@@ -196,7 +211,8 @@
           (shoot-bullet bullet_x bullet_y gun-direction 200)
           (tset p :last-fired world.time)))
     (tset p :x new_x)
-    (tset p :y new_y)))
+    (tset p :y new_y)
+    (tset p :direction direction)))
 
 (local valid-keys {:w true
                    :s true
@@ -207,10 +223,30 @@
                    :k true
                    :l true})
 
+(fn get-entity-animation [e]
+  (let [animations e.animations]
+    (case e.direction
+      :up animations.up
+      :upright animations.up
+      :upleft animations.up
+      :left animations.left
+      :right animations.right
+      :down animations.down
+      :downleft animations.down
+      :downright animations.down
+      :nothing animations.down
+      _ (print "problem in getting animations!"))
+    ))
+
 (fn draw-entity [e]
-  (let [{: x : y : w : h : colour : life} e]
-    (love.graphics.setColor (unpack colour))
-    (love.graphics.rectangle :fill x y w h)
+  (let [{: x : y : w : h : colour : life : animations} e]
+    (if animations
+        (let [animation (get-entity-animation e)]
+          (love.graphics.draw animation.sprite_sheet (. animation.quads 1) x y))
+        (do
+          (love.graphics.setColor (unpack colour))
+          (love.graphics.rectangle :fill x y w h)
+          ))
     (if life
         (let [font (love.graphics.getFont)
               text (love.graphics.newText font life)
