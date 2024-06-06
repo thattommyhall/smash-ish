@@ -11,8 +11,8 @@
 (local BLACK [])
 (local WHITE [255 255 255 1])
 
-(local logos (love.filesystem.getDirectoryItems :assets/logos))
-
+(local logos (icollect [_ name (ipairs (love.filesystem.getDirectoryItems :assets/logos))]
+               (love.graphics.newImage (.. "assets/logos/" name))))
 (fn pp [e]
   (print (inspect e)))
 
@@ -32,6 +32,7 @@
               (lume.randomchoice [(math.random (- height size) height)
                                   (math.random (- size) 0)])
               (math.random (- size) height))
+        logo (lume.randomchoice logos)
         enemy {: x
                : y
                :w size
@@ -40,6 +41,8 @@
                :colour [(math.random) (math.random) (math.random) 1]
                :speed 20
                :life 3
+               :scale 0.375
+               :animations {:logo (new-animation logo 128 128)} ;; size of our logos
                :direction (lume.randomchoice [:up
                                               :down
                                               :left
@@ -70,7 +73,7 @@
     (bumpworld:add bullet bullet.x bullet.y bullet.w bullet.h)))
 
 (for [i 1 5]
-  (generate-enemy 32))
+  (generate-enemy 48))
 
 (local p1 {:type :player
            :x 50
@@ -191,7 +194,7 @@
                                    (tset col.other :life (- col.other.life 1))
                                    (do
                                      (remove-entity col.other)
-                                     (generate-enemy 64)))
+                                     (generate-enemy 48)))
                                (remove-entity e))
                       :wall (remove-entity e))))
       :enemy (do
@@ -260,15 +263,18 @@
                 :downright animations.down
                 :nothing animations.down
                 _ (print "problem in getting animations!"))
-      :bullet animations.lambda)))
+      :bullet animations.lambda
+      :enemy animations.logo)))
 
 (fn draw-entity [e]
   (let [{: x : y : w : h : colour : life : animations} e]
     (if animations
         (let [animation (get-entity-animation e)
-              orientation (or e.orientation 0)]
+              orientation (or e.orientation 0)
+              sx (or e.scale 1)
+              sy (or e.scale 1)]
           (love.graphics.draw animation.sprite_sheet (. animation.quads 1) x y
-                              orientation))
+                              orientation sx sy))
         (do
           (love.graphics.setColor (unpack colour))
           (love.graphics.rectangle :fill x y w h)))
