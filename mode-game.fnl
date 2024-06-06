@@ -293,14 +293,14 @@
          (love.graphics.setColor 1 1 1 1)
          (love.graphics.draw background 0 0)
          (love.graphics.setColor 1 1 1 1)
+         (each [_ e (ipairs entities)]
+           (draw-entity e))
+         (draw-entity p1)
          (love.graphics.printf (: "Spiceyness Level: %s" :format
                                   (* (lume.count entities
                                                  #(not= :bullet $.type))
                                      enemy-speed))
                                0 10 width :center)
-         (each [_ e (ipairs entities)]
-           (draw-entity e))
-         (draw-entity p1)
          (if lost
              (do
                (love.graphics.setColor 1 1 1 1)
